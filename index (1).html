@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Custom styles for the scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-4xl p-8 transform transition-all duration-500 scale-95 hover:scale-100">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-center text-indigo-800 mb-8">Money Manager</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
+            <!-- Income Section -->
+            <div class="bg-green-50 p-6 rounded-2xl shadow-md border border-green-200">
+                <p class="text-xl font-medium text-gray-600">Total Income</p>
+                <p id="total-income" class="text-3xl font-bold text-green-600 mt-2">₹0</p>
+            </div>
+            <!-- Expense Section -->
+            <div class="bg-red-50 p-6 rounded-2xl shadow-md border border-red-200">
+                <p class="text-xl font-medium text-gray-600">Total Expenses</p>
+                <p id="total-expenses" class="text-3xl font-bold text-red-600 mt-2">₹0</p>
+            </div>
+            <!-- Balance Section -->
+            <div class="bg-blue-50 p-6 rounded-2xl shadow-md border border-blue-200">
+                <p class="text-xl font-medium text-gray-600">Remaining Balance</p>
+                <p id="remaining-balance" class="text-3xl font-bold text-blue-600 mt-2">₹0</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left Column: Input Forms -->
+            <div>
+                <div class="bg-gray-50 p-6 rounded-2xl shadow-inner mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Add Transaction</h2>
+                    
+                    <!-- Income Form -->
+                    <form id="income-form" class="mb-6">
+                        <label for="income-amount" class="block text-sm font-medium text-gray-700 mb-2">Income Amount</label>
+                        <div class="flex space-x-2">
+                            <input type="number" id="income-amount" placeholder="Enter income amount" class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-300">
+                            <button type="submit" class="bg-green-600 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:bg-green-700 transition-all duration-300 ease-in-out">
+                                Add Income
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Expense Form -->
+                    <form id="expense-form">
+                        <label for="expense-amount" class="block text-sm font-medium text-gray-700 mb-2">Expense Amount</label>
+                        <input type="number" id="expense-amount" placeholder="Enter expense amount" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-300">
+                        
+                        <label for="expense-description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <input type="text" id="expense-description" placeholder="e.g., Groceries from Big Bazaar" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-300">
+                        
+                        <label for="expense-category" class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                        <select id="expense-category" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-300"></select>
+
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-medium py-3 rounded-lg shadow-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out transform hover:scale-105">
+                            Add Expense
+                        </button>
+                    </form>
+
+                    <!-- Custom Category Form -->
+                    <div class="mt-6 border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Add Custom Category</h3>
+                        <form id="custom-category-form" class="flex space-x-2">
+                            <input type="text" id="custom-category" placeholder="e.g., Hobbies" class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                            <button type="submit" class="bg-gray-400 text-white font-medium py-3 px-4 rounded-lg shadow-md hover:bg-gray-500 transition-all duration-300 ease-in-out">
+                                Add
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Stats and Tips -->
+            <div>
+                <!-- Statistics Section -->
+                <div class="bg-gray-50 p-6 rounded-2xl shadow-inner mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Spending Breakdown</h2>
+                    <canvas id="expense-chart" class="w-full h-64"></canvas>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="bg-gray-50 p-6 rounded-2xl shadow-inner">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Tips to Minimize Expenses</h2>
+                    <p id="expense-tips" class="text-gray-700 text-base leading-relaxed">
+                        Add some expenses to get personalized tips here.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense History -->
+        <div class="mt-8 bg-white p-6 rounded-2xl shadow-2xl">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Transaction History</h2>
+            <div id="transaction-history" class="space-y-4 max-h-96 overflow-y-auto">
+                <p class="text-gray-500 text-center">No transactions added yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Alerts and Edits -->
+    <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
+            <h3 id="modal-title" class="text-xl font-semibold text-gray-800 mb-4"></h3>
+            <p id="modal-message" class="text-gray-700 mb-6"></p>
+            <div id="modal-input-group" class="hidden space-y-4 mb-6">
+                <input type="number" id="edit-amount" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="New amount">
+                <input type="text" id="edit-description" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="New description">
+            </div>
+            <div id="modal-buttons" class="flex justify-end space-x-4">
+                <button id="modal-cancel" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+                <button id="modal-confirm" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const incomeForm = document.getElementById('income-form');
+        const expenseForm = document.getElementById('expense-form');
+        const customCategoryForm = document.getElementById('custom-category-form');
+        const incomeAmountInput = document.getElementById('income-amount');
+        const expenseAmountInput = document.getElementById('expense-amount');
+        const expenseDescriptionInput = document.getElementById('expense-description');
+        const expenseCategorySelect = document.getElementById('expense-category');
+        const customCategoryInput = document.getElementById('custom-category');
+        const totalIncomeEl = document.getElementById('total-income');
+        const totalExpensesEl = document.getElementById('total-expenses');
+        const remainingBalanceEl = document.getElementById('remaining-balance');
+        const transactionHistoryEl = document.getElementById('transaction-history');
+        const expenseChartCanvas = document.getElementById('expense-chart');
+        const expenseTipsEl = document.getElementById('expense-tips');
+        const customModal = document.getElementById('custom-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalInputGroup = document.getElementById('modal-input-group');
+        const editAmountInput = document.getElementById('edit-amount');
+        const editDescriptionInput = document.getElementById('edit-description');
+        const modalConfirmBtn = document.getElementById('modal-confirm');
+        const modalCancelBtn = document.getElementById('modal-cancel');
+
+        let income = 0;
+        let expenses = [];
+        let categories = ["Food", "Transport", "Household", "Beauty", "Apparel", "Health", "Education", "Gift", "Social life", "Others"];
+
+        // --- Data Persistence (using localStorage) ---
+        function loadData() {
+            const storedIncome = localStorage.getItem('income');
+            const storedExpenses = localStorage.getItem('expenses');
+            const storedCategories = localStorage.getItem('categories');
+
+            if (storedIncome) {
+                income = parseFloat(storedIncome);
+            }
+            if (storedExpenses) {
+                expenses = JSON.parse(storedExpenses);
+            }
+            if (storedCategories) {
+                categories = JSON.parse(storedCategories);
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('income', income);
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            localStorage.setItem('categories', JSON.stringify(categories));
+        }
+
+        // --- Monthly Reset Logic ---
+        function checkAndResetMonth() {
+            const lastResetDate = localStorage.getItem('lastResetDate');
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth();
+            const currentYear = currentDate.getFullYear();
+
+            if (lastResetDate) {
+                const storedDate = new Date(lastResetDate);
+                const storedMonth = storedDate.getMonth();
+                const storedYear = storedDate.getFullYear();
+
+                if (currentMonth !== storedMonth || currentYear !== storedYear) {
+                    income = 0;
+                    expenses = [];
+                    localStorage.setItem('lastResetDate', currentDate.toISOString());
+                    showCustomModal('Month Reset', 'It\'s a new month! Your income and expenses have been reset.', false);
+                }
+            } else {
+                localStorage.setItem('lastResetDate', currentDate.toISOString());
+            }
+        }
+
+        // --- UI Rendering Functions ---
+
+        function renderCategories() {
+            expenseCategorySelect.innerHTML = '';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                expenseCategorySelect.appendChild(option);
+            });
+        }
+
+        function updateSummary() {
+            const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
+            const remainingBalance = income - totalExpenses;
+
+            totalIncomeEl.textContent = `₹${income.toLocaleString('en-IN')}`;
+            totalExpensesEl.textContent = `₹${totalExpenses.toLocaleString('en-IN')}`;
+            remainingBalanceEl.textContent = `₹${remainingBalance.toLocaleString('en-IN')}`;
+
+            // Style balance based on value
+            if (remainingBalance < 0) {
+                remainingBalanceEl.classList.add('text-red-600');
+                remainingBalanceEl.classList.remove('text-blue-600');
+            } else {
+                remainingBalanceEl.classList.add('text-blue-600');
+                remainingBalanceEl.classList.remove('text-red-600');
+            }
+        }
+
+        function renderTransactionHistory() {
+            transactionHistoryEl.innerHTML = '';
+            if (expenses.length === 0) {
+                transactionHistoryEl.innerHTML = '<p class="text-gray-500 text-center">No transactions added yet.</p>';
+                return;
+            }
+
+            expenses.forEach(expense => {
+                const transactionItem = document.createElement('div');
+                transactionItem.className = 'flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow-sm hover:bg-gray-200 transition-colors duration-200';
+                transactionItem.setAttribute('data-id', expense.id);
+                const date = new Date(expense.date);
+                transactionItem.innerHTML = `
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800">${expense.description}</p>
+                        <p class="text-sm text-gray-500">${expense.category}</p>
+                        <p class="text-xs text-gray-400 mt-1">${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <p class="font-semibold text-red-600">- ₹${expense.amount.toLocaleString('en-IN')}</p>
+                        <button class="edit-btn p-2 rounded-full hover:bg-yellow-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </button>
+                        <button class="delete-btn p-2 rounded-full hover:bg-red-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                transactionHistoryEl.appendChild(transactionItem);
+            });
+
+            // Attach event listeners to new buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.closest('[data-id]').getAttribute('data-id');
+                    handleDeleteExpense(id);
+                });
+            });
+
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.closest('[data-id]').getAttribute('data-id');
+                    handleEditExpense(id);
+                });
+            });
+        }
+
+        function renderChart() {
+            const ctx = expenseChartCanvas.getContext('2d');
+            ctx.clearRect(0, 0, expenseChartCanvas.width, expenseChartCanvas.height);
+
+            const categoryData = {};
+            categories.forEach(cat => categoryData[cat] = 0);
+            expenses.forEach(item => {
+                if (categoryData[item.category] !== undefined) {
+                    categoryData[item.category] += item.amount;
+                }
+            });
+
+            const maxAmount = Math.max(...Object.values(categoryData), 100);
+            const barWidth = 30;
+            const gap = 20;
+            const startX = 50;
+            const startY = expenseChartCanvas.height - 30;
+
+            // Draw bars
+            Object.keys(categoryData).forEach((category, index) => {
+                const amount = categoryData[category];
+                const barHeight = (amount / maxAmount) * (expenseChartCanvas.height - 60);
+                const x = startX + index * (barWidth + gap);
+                const y = startY - barHeight;
+
+                // Bar
+                ctx.fillStyle = '#6366f1';
+                ctx.fillRect(x, y, barWidth, barHeight);
+
+                // Amount text
+                ctx.fillStyle = '#1f2937';
+                ctx.font = '12px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText(`₹${amount.toLocaleString('en-IN')}`, x + (barWidth / 2), y - 5);
+
+                // Category label
+                ctx.save();
+                ctx.translate(x + barWidth / 2, startY + 5);
+                ctx.rotate(Math.PI / 4);
+                ctx.textAlign = 'left';
+                ctx.fillText(category, 0, 0);
+                ctx.restore();
+            });
+
+            // Draw y-axis line and labels
+            ctx.beginPath();
+            ctx.moveTo(startX - 10, startY);
+            ctx.lineTo(startX - 10, startY - (expenseChartCanvas.height - 60));
+            ctx.stroke();
+        }
+
+        function getExpenseTips() {
+            if (expenses.length === 0) {
+                expenseTipsEl.textContent = "Start by adding your income and expenses to get personalized tips on how to save money!";
+                return;
+            }
+
+            const categoryTotals = expenses.reduce((acc, expense) => {
+                acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
+                return acc;
+            }, {});
+
+            const sortedCategories = Object.keys(categoryTotals).sort((a, b) => categoryTotals[b] - categoryTotals[a]);
+            const topCategory = sortedCategories[0];
+            const topAmount = categoryTotals[topCategory];
+            
+            let tip = `Your biggest expense category this month is "${topCategory}", amounting to ₹${topAmount.toLocaleString('en-IN')}. `;
+            
+            switch (topCategory.toLowerCase()) {
+                case 'food':
+                    tip += "Try planning your meals for the week to avoid last-minute takeouts, and pack your lunch instead of buying it.";
+                    break;
+                case 'transport':
+                    tip += "Consider using public transport or carpooling with colleagues to reduce fuel costs.";
+                    break;
+                case 'apparel':
+                    tip += "Before buying new clothes, check if you can repurpose items you already own or shop at second-hand stores.";
+                    break;
+                case 'social life':
+                    tip += "Look for free or low-cost social activities, like hosting a potluck or going for a hike with friends.";
+                    break;
+                case 'others':
+                    tip += "Review your transactions in the 'others' category to identify and budget for those miscellaneous costs next month.";
+                    break;
+                default:
+                    tip += "Reviewing your spending in this category can help you find small ways to save for next month.";
+            }
+
+            expenseTipsEl.textContent = tip;
+        }
+
+        // --- Custom Modal Functionality ---
+        function showCustomModal(title, message, showInput, onConfirm, initialData = {}) {
+            customModal.classList.remove('hidden');
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+
+            if (showInput) {
+                modalInputGroup.classList.remove('hidden');
+                editAmountInput.value = initialData.amount || '';
+                editDescriptionInput.value = initialData.description || '';
+            } else {
+                modalInputGroup.classList.add('hidden');
+            }
+
+            modalConfirmBtn.onclick = () => {
+                onConfirm();
+                customModal.classList.add('hidden');
+            };
+
+            modalCancelBtn.onclick = () => {
+                customModal.classList.add('hidden');
+            };
+        }
+
+        // --- Event Handlers ---
+        
+        incomeForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const amount = parseFloat(incomeAmountInput.value);
+            if (isNaN(amount) || amount <= 0) {
+                showCustomModal('Invalid Input', 'Please enter a valid income amount.', false);
+                return;
+            }
+            income = amount;
+            incomeAmountInput.value = '';
+            updateUI();
+        });
+
+        expenseForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const amount = parseFloat(expenseAmountInput.value);
+            const description = expenseDescriptionInput.value.trim();
+            const category = expenseCategorySelect.value;
+            
+            if (isNaN(amount) || amount <= 0 || description === '') {
+                showCustomModal('Invalid Input', 'Please enter a valid amount and description.', false);
+                return;
+            }
+            
+            const newExpense = {
+                id: Date.now().toString(),
+                amount,
+                description,
+                category,
+                date: new Date().toISOString()
+            };
+            expenses.unshift(newExpense);
+            
+            expenseAmountInput.value = '';
+            expenseDescriptionInput.value = '';
+            updateUI();
+        });
+
+        customCategoryForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newCategory = customCategoryInput.value.trim();
+            if (newCategory && !categories.includes(newCategory)) {
+                categories.push(newCategory);
+                customCategoryInput.value = '';
+                updateUI();
+            } else {
+                showCustomModal('Invalid Category', 'Please enter a new, unique category name.', false);
+            }
+        });
+
+        function handleDeleteExpense(id) {
+            showCustomModal(
+                'Confirm Deletion',
+                'Are you sure you want to delete this expense?',
+                false,
+                () => {
+                    expenses = expenses.filter(exp => exp.id !== id);
+                    updateUI();
+                }
+            );
+        }
+
+        function handleEditExpense(id) {
+            const expenseToEdit = expenses.find(exp => exp.id === id);
+            if (!expenseToEdit) return;
+
+            showCustomModal(
+                'Edit Expense',
+                'Update the details for this transaction.',
+                true,
+                () => {
+                    const newAmount = parseFloat(editAmountInput.value);
+                    const newDescription = editDescriptionInput.value.trim();
+                    if (!isNaN(newAmount) && newAmount > 0 && newDescription !== '') {
+                        expenseToEdit.amount = newAmount;
+                        expenseToEdit.description = newDescription;
+                        updateUI();
+                    } else {
+                        showCustomModal('Invalid Input', 'Please enter valid values to update the expense.', false);
+                    }
+                },
+                { amount: expenseToEdit.amount, description: expenseToEdit.description }
+            );
+        }
+
+        function updateUI() {
+            saveData();
+            updateSummary();
+            renderCategories();
+            renderTransactionHistory();
+            renderChart();
+            getExpenseTips();
+        }
+
+        // Initial setup
+        window.onload = function() {
+            checkAndResetMonth();
+            loadData();
+            updateUI();
+        };
+
+    </script>
+</body>
+</html>
